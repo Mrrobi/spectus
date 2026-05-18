@@ -1,12 +1,12 @@
 [project]
 name = "spectus"
-version = "0.2.0"
+version = "0.2.1"
 description = "AI-assisted web data extractor — paste a URL + plain-English instruction, get structured JSON or CSV. Resilient to DOM changes via semantic LLM extraction."
 requires-python = ">=3.12"
 readme = "README.md"
 license = {text = "MIT"}
 authors = [
-    {name = "Mrrobi", email = "mrrobi@users.noreply.github.com"},
+    {name = "Mrrobi", email = "mrrobi040@gmail.com"},
 ]
 keywords = ["scraping", "ai", "llm", "data-extraction", "playwright", "openai"]
 classifiers = [
