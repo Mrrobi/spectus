@@ -3,8 +3,8 @@ from __future__ import annotations
 import re
 import statistics
 from collections import defaultdict
+from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Iterable
 
 from selectolax.parser import HTMLParser, Node
 
@@ -116,10 +116,7 @@ def _has_image(siblings: list[Node]) -> bool:
 
 
 def _has_price_pattern(siblings: list[Node]) -> bool:
-    for s in siblings[:5]:
-        if _PRICE_RE.search(s.text(strip=False) or ""):
-            return True
-    return False
+    return any(_PRICE_RE.search(s.text(strip=False) or "") for s in siblings[:5])
 
 
 def _score(
@@ -203,9 +200,7 @@ def detect_repeated_sections(html: str) -> list[CandidateSection]:
             if _has_ancestor_tag(parent, _NAV_TAGS):
                 continue
             sample = siblings[:10]
-            avg_children = (
-                statistics.mean(_count_descendants(s) for s in sample) if sample else 0.0
-            )
+            avg_children = statistics.mean(_count_descendants(s) for s in sample) if sample else 0.0
             if avg_children < 2:
                 continue
             sim = _structural_similarity(sample)

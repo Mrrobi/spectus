@@ -3,8 +3,8 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass
 
-from spectus.config import Settings
-from spectus.errors import ExtractionPlanError, SchemaGenerationError
+from spectus._core.extraction_executor import ExtractionExecutor
+from spectus._core.validator import Validator
 from spectus._llm.client import LlmClient
 from spectus._llm.prompts import REPAIR_SYSTEM, REPAIR_USER_TEMPLATE
 from spectus._schemas.execution import ExtractionResult
@@ -12,8 +12,8 @@ from spectus._schemas.intent import IntentSchema
 from spectus._schemas.page import CompactPage
 from spectus._schemas.plan import ExtractionPlan
 from spectus._schemas.validation import ValidationReport
-from spectus._core.extraction_executor import ExtractionExecutor
-from spectus._core.validator import Validator
+from spectus.config import Settings
+from spectus.errors import ExtractionPlanError, SchemaGenerationError
 
 
 @dataclass(frozen=True)

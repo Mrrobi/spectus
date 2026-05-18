@@ -124,9 +124,7 @@ class Validator:
         records = result.records
         n = len(records)
         containers = (
-            compact.candidate_sections[0].count
-            if compact.candidate_sections
-            else max(1, n)
+            compact.candidate_sections[0].count if compact.candidate_sections else max(1, n)
         )
         record_count_score = self._record_count_score(n, containers, schema.expected_output)
         required_fields = schema.required_fields()

@@ -6,8 +6,8 @@ from urllib.parse import urljoin
 
 from selectolax.parser import HTMLParser, Node
 
-from spectus._schemas.bundle import AnchorEntry, FactsBundle, KVPair
 from spectus._core import structured_data
+from spectus._schemas.bundle import AnchorEntry, FactsBundle, KVPair
 
 _WS_RE = re.compile(r"\s+")
 _NON_VISIBLE = frozenset({"script", "style", "noscript", "head", "meta", "link", "template"})
@@ -52,7 +52,7 @@ def _collect_kv_from_dl(tree: HTMLParser) -> list[KVPair]:
     for dl in tree.css("dl"):
         dts = dl.css("dt")
         dds = dl.css("dd")
-        for dt, dd in zip(dts, dds):
+        for dt, dd in zip(dts, dds, strict=False):
             label = _text(dt)[:120]
             value = _text(dd)[:300]
             if label and value:
@@ -130,9 +130,7 @@ def _collect_calendar_urls(anchors: list[AnchorEntry]) -> list[str]:
     out: list[str] = []
     for a in anchors:
         href = a.href.lower()
-        if any(h in href for h in _CALENDAR_HOSTS):
-            out.append(a.href)
-        elif "icalendarfrom=" in href or "ical=" in href:
+        if any(h in href for h in _CALENDAR_HOSTS) or "icalendarfrom=" in href or "ical=" in href:
             out.append(a.href)
     return out[:5]
 

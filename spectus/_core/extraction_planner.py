@@ -2,13 +2,13 @@ from __future__ import annotations
 
 import json
 
-from spectus.config import Settings
-from spectus.errors import ExtractionPlanError, SchemaGenerationError
 from spectus._llm.client import LlmClient
 from spectus._llm.prompts import PLANNER_SYSTEM, PLANNER_USER_TEMPLATE
 from spectus._schemas.intent import IntentSchema
 from spectus._schemas.page import CompactPage
 from spectus._schemas.plan import ExtractionPlan
+from spectus.config import Settings
+from spectus.errors import ExtractionPlanError, SchemaGenerationError
 
 
 class ExtractionPlanner:

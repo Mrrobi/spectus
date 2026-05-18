@@ -1,6 +1,6 @@
 [project]
 name = "spectus"
-version = "0.2.1"
+version = "0.2.2"
 description = "AI-assisted web data extractor — paste a URL + plain-English instruction, get structured JSON or CSV. Resilient to DOM changes via semantic LLM extraction."
 requires-python = ">=3.12"
 readme = "README.md"
@@ -81,9 +81,27 @@ include = ["spectus*", "alembic*"]
 line-length = 100
 target-version = "py312"
 
+[tool.ruff.lint.per-file-ignores]
+"*.ipynb" = ["E402"]                          # imports after a chdir / env-load are normal in notebooks
+"tests/**" = ["PLR2004", "B011"]              # asserts use literals
+
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP", "PL", "SIM", "RUF"]
-ignore = ["E501", "PLR0913", "PLR0912", "PLR0915"]
+ignore = [
+    "E501",     # long lines (handled by formatter)
+    "PLR0913",  # too many arguments
+    "PLR0912",  # too many branches
+    "PLR0915",  # too many statements
+    "PLR0911",  # too many return statements
+    "PLR2004",  # magic value comparison
+    "PLC0415",  # non-top-level imports (used intentionally for lazy + circular)
+    "PLW0603",  # use of global (singleton settings pattern)
+    "SIM102",   # nested if (sometimes clearer)
+    "RUF001",   # ambiguous unicode characters in strings (intentional in prompts/docs)
+    "RUF002",   # ambiguous unicode in docstrings
+    "RUF003",   # ambiguous unicode in comments
+    "B017",     # pytest.raises(Exception) — fine in negative tests
+]
 
 [tool.mypy]
 python_version = "3.12"

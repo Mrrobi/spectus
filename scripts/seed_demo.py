@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import asyncio
 
-from spectus.config import get_settings
 from spectus._db.session import make_engine, make_sessionmaker
+from spectus.config import get_settings
 from spectus.logging import configure_logging, get_logger
 
 

@@ -1,13 +1,18 @@
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 from uuid import UUID
 
 from sqlalchemy import desc, select, update
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
-from spectus._db.models import ExtractionArtifact, ExtractionJob, ExtractionResult, ExtractionTemplate
+from spectus._db.models import (
+    ExtractionArtifact,
+    ExtractionJob,
+    ExtractionResult,
+    ExtractionTemplate,
+)
 
 
 class JobRepo:
@@ -54,12 +59,12 @@ class JobRepo:
         if not fields:
             return
         async with self._sm() as s:
-            await s.execute(update(ExtractionJob).where(ExtractionJob.id == job_id).values(**fields))
+            await s.execute(
+                update(ExtractionJob).where(ExtractionJob.id == job_id).values(**fields)
+            )
             await s.commit()
 
-    async def save_result(
-        self, job_id: UUID, records: Any, diagnostics: dict[str, Any]
-    ) -> None:
+    async def save_result(self, job_id: UUID, records: Any, diagnostics: dict[str, Any]) -> None:
         async with self._sm() as s:
             s.add(ExtractionResult(job_id=job_id, records=records, diagnostics=diagnostics))
             await s.commit()
@@ -79,9 +84,7 @@ class TemplateRepo:
     def __init__(self, sessionmaker: async_sessionmaker[AsyncSession]) -> None:
         self._sm = sessionmaker
 
-    async def find_candidates(
-        self, domain: str, goal_signature: str
-    ) -> list[ExtractionTemplate]:
+    async def find_candidates(self, domain: str, goal_signature: str) -> list[ExtractionTemplate]:
         async with self._sm() as s:
             stmt = (
                 select(ExtractionTemplate)
@@ -133,10 +136,10 @@ class TemplateRepo:
             row.consecutive_successes += 1
             row.consecutive_failures = 0
             row.success_score = score
-            row.last_used_at = datetime.now(timezone.utc)
-            if row.status == "candidate" and row.consecutive_successes >= 3 and score >= 0.80:
-                row.status = "active"
-            elif row.status == "needs_review" and row.consecutive_successes >= 2:
+            row.last_used_at = datetime.now(UTC)
+            if (row.status == "candidate" and row.consecutive_successes >= 3 and score >= 0.80) or (
+                row.status == "needs_review" and row.consecutive_successes >= 2
+            ):
                 row.status = "active"
             await s.commit()
 
@@ -147,7 +150,7 @@ class TemplateRepo:
                 return
             row.consecutive_failures += 1
             row.consecutive_successes = 0
-            row.last_used_at = datetime.now(timezone.utc)
+            row.last_used_at = datetime.now(UTC)
             if row.consecutive_failures >= 5:
                 row.status = "deprecated"
             elif row.consecutive_failures >= 2 and row.status == "active":

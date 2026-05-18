@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from spectus._schemas.intent import FieldSpec, IntentSchema
 from spectus._core.template_manager import goal_signature, url_pattern_glob
+from spectus._schemas.intent import FieldSpec, IntentSchema
 
 
 def _schema(names):
@@ -30,10 +30,7 @@ def test_url_pattern_glob_numeric():
 
 
 def test_url_pattern_glob_hex():
-    assert (
-        url_pattern_glob("https://x.com/items/abcdef1234567890")
-        == "/items/*"
-    )
+    assert url_pattern_glob("https://x.com/items/abcdef1234567890") == "/items/*"
 
 
 def test_url_pattern_glob_slug_with_digit():

@@ -9,24 +9,15 @@ Usage:
     ex.save_csv(resp, "hn.csv")
     await ex.close()
 """
+
 from __future__ import annotations
 
-import csv
 import json
 from pathlib import Path
 from typing import Any
-from uuid import UUID
 
 import httpx
 
-from spectus.config import Settings, get_settings
-from spectus._db.repositories import ArtifactRepo, JobRepo, TemplateRepo
-from spectus._db.session import dispose_engine, make_engine, make_sessionmaker
-from spectus._core.pipeline import Pipeline
-from spectus._llm.client import LlmClient
-from spectus.logging import configure_logging
-from spectus._schemas.api import ExtractionOptions, ExtractionRequest, ExtractionResponse
-from spectus._schemas.template import Template
 from spectus._core.artifacts import ArtifactsWriter
 from spectus._core.browser_pool import BrowserPool
 from spectus._core.browser_renderer import BrowserRenderer
@@ -39,11 +30,19 @@ from spectus._core.metrics import Metrics
 from spectus._core.normalizer import FieldNormalizer
 from spectus._core.orchestrator import run_extraction
 from spectus._core.page_analyzer import PageAnalyzer
+from spectus._core.pipeline import Pipeline
 from spectus._core.repair_manager import RepairManager
 from spectus._core.semantic_extractor import SemanticExtractor
 from spectus._core.static_fetcher import StaticFetcher
 from spectus._core.template_manager import TemplateManager
 from spectus._core.validator import Validator
+from spectus._db.repositories import ArtifactRepo, JobRepo, TemplateRepo
+from spectus._db.session import dispose_engine, make_engine, make_sessionmaker
+from spectus._llm.client import LlmClient
+from spectus._schemas.api import ExtractionOptions, ExtractionRequest, ExtractionResponse
+from spectus._schemas.template import Template
+from spectus.config import Settings, get_settings
+from spectus.logging import configure_logging
 
 
 class Extractor:
@@ -63,7 +62,7 @@ class Extractor:
         log_level: str = "WARNING",
         browser: bool = True,
         settings_overrides: dict | None = None,
-    ) -> "Extractor":
+    ) -> Extractor:
         ex = cls()
         ex.settings = get_settings()
         overrides: dict = dict(settings_overrides or {})
@@ -185,8 +184,10 @@ class Extractor:
             f"records:  {d.records_found}  quality: {d.quality_score}  "
             f"repairs: {d.repair_attempts}  template: {d.template_used}"
         )
-        print(f"runtime:  {d.runtime_ms} ms  llm_calls: {d.llm_calls}  "
-              f"tokens_in: {d.llm_tokens_in}  tokens_out: {d.llm_tokens_out}")
+        print(
+            f"runtime:  {d.runtime_ms} ms  llm_calls: {d.llm_calls}  "
+            f"tokens_in: {d.llm_tokens_in}  tokens_out: {d.llm_tokens_out}"
+        )
         if resp.message:
             print(f"message:  {resp.message}")
         if d.warnings:
@@ -200,6 +201,7 @@ class Extractor:
     def to_dataframe(resp: ExtractionResponse):
         """Return pandas DataFrame. Requires `pip install pandas`."""
         import pandas as pd  # type: ignore[import-not-found]
+
         return pd.DataFrame(Extractor.records(resp))
 
     @staticmethod

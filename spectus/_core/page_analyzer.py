@@ -5,7 +5,8 @@ from urllib.parse import urljoin
 
 from selectolax.parser import HTMLParser, Node
 
-from spectus.config import Settings
+from spectus._core import structured_data
+from spectus._core.repeated_detector import detect_repeated_sections
 from spectus._schemas.intent import IntentSchema
 from spectus._schemas.page import (
     CompactPage,
@@ -13,8 +14,7 @@ from spectus._schemas.page import (
     StructuredDataSummary,
     TableSummary,
 )
-from spectus._core import structured_data
-from spectus._core.repeated_detector import detect_repeated_sections
+from spectus.config import Settings
 
 _NON_VISIBLE_TAGS = frozenset({"script", "style", "noscript", "head", "meta", "link", "template"})
 _WS_RE = re.compile(r"\s+")
@@ -175,23 +175,17 @@ class PageAnalyzer:
     def is_sufficient_for(self, page: CompactPage, schema: IntentSchema) -> bool:
         if page.visible_text_length < 1000:
             return False
-        if (
-            schema.expected_output == "array"
-            and not page.candidate_sections
-            and not page.tables
-        ):
+        if schema.expected_output == "array" and not page.candidate_sections and not page.tables:
             return False
-        if (
-            page.text_to_markup_ratio < 0.05
-            and page.structured_data.next_data_present
-        ):
+        if page.text_to_markup_ratio < 0.05 and page.structured_data.next_data_present:
             return False
         if schema.expected_output == "array":
             text_blob = " ".join(page.headings).lower()
             if page.candidate_sections:
-                text_blob += " " + " ".join(
-                    " ".join(c.sample_texts) for c in page.candidate_sections
-                ).lower()
+                text_blob += (
+                    " "
+                    + " ".join(" ".join(c.sample_texts) for c in page.candidate_sections).lower()
+                )
             if not any(_field_term(f.name) in text_blob for f in schema.required_fields()):
                 if not page.structured_data.json_ld_types:
                     return False

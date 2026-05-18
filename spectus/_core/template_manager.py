@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import hashlib
 import re
-from datetime import datetime, timezone
 from fnmatch import fnmatch
 from urllib.parse import urlparse
 from uuid import UUID

@@ -34,9 +34,7 @@ class ExtractionJob(Base):
         ForeignKey("extraction_templates.id"), default=None
     )
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
-    updated_at: Mapped[datetime] = mapped_column(
-        server_default=func.now(), onupdate=func.now()
-    )
+    updated_at: Mapped[datetime] = mapped_column(server_default=func.now(), onupdate=func.now())
 
 
 class ExtractionResult(Base):
@@ -64,14 +62,10 @@ class ExtractionTemplate(Base):
     consecutive_successes: Mapped[int] = mapped_column(default=0)
     consecutive_failures: Mapped[int] = mapped_column(default=0)
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
-    updated_at: Mapped[datetime] = mapped_column(
-        server_default=func.now(), onupdate=func.now()
-    )
+    updated_at: Mapped[datetime] = mapped_column(server_default=func.now(), onupdate=func.now())
     last_used_at: Mapped[datetime | None] = mapped_column(default=None)
 
-    __table_args__ = (
-        Index("ix_tpl_domain_goal", "domain", "goal_signature"),
-    )
+    __table_args__ = (Index("ix_tpl_domain_goal", "domain", "goal_signature"),)
 
 
 class ExtractionArtifact(Base):

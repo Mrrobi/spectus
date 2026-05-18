@@ -4,11 +4,11 @@ from time import monotonic
 
 import httpx
 
+from spectus._core.url_normalizer import NormalizedUrl
+from spectus._schemas.execution import FetchResult
 from spectus.config import Settings
 from spectus.errors import FetchError, UnsupportedContentTypeError
 from spectus.logging import get_logger
-from spectus._schemas.execution import FetchResult
-from spectus._core.url_normalizer import NormalizedUrl
 
 _ALLOWED_CONTENT_TYPES = ("text/html", "application/xhtml+xml", "application/xml", "text/xml")
 
@@ -24,9 +24,7 @@ class StaticFetcher:
         try:
             r = await self._http.get(
                 url.canonical,
-                timeout=httpx.Timeout(
-                    deadline_s, connect=self._settings.http_connect_timeout_sec
-                ),
+                timeout=httpx.Timeout(deadline_s, connect=self._settings.http_connect_timeout_sec),
                 headers={"Accept": "text/html,application/xhtml+xml,*/*;q=0.8"},
             )
         except httpx.TimeoutException as e:

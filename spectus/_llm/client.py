@@ -2,19 +2,17 @@ from __future__ import annotations
 
 import asyncio
 import json
-from pathlib import Path
 from time import monotonic
-from typing import Any, Type, TypeVar
+from typing import Any, TypeVar
 
-from openai import APITimeoutError, AsyncOpenAI, RateLimitError
 from openai import APIError as OpenAIAPIError
-from openai import LengthFinishReasonError
+from openai import APITimeoutError, AsyncOpenAI, LengthFinishReasonError, RateLimitError
 from pydantic import BaseModel, ValidationError
 
+from spectus._core.metrics import Metrics
 from spectus.config import Settings
 from spectus.errors import LlmTransientError, SchemaGenerationError
 from spectus.logging import get_logger
-from spectus._core.metrics import Metrics
 
 T = TypeVar("T", bound=BaseModel)
 
@@ -56,7 +54,7 @@ class LlmClient:
         model: str,
         system: str,
         user: str,
-        response_model: Type[T],
+        response_model: type[T],
         max_tokens: int,
         timeout_s: float,
         temperature: float = 0.0,
@@ -136,7 +134,7 @@ class LlmClient:
         *,
         model: str,
         messages: list[dict[str, Any]],
-        response_model: Type[T],
+        response_model: type[T],
         max_tokens: int,
         timeout_s: float,
         temperature: float,
@@ -157,7 +155,7 @@ class LlmClient:
                 self._client.beta.chat.completions.parse(**kwargs),
                 timeout=timeout_s,
             )
-        except (APITimeoutError, asyncio.TimeoutError) as e:
+        except (TimeoutError, APITimeoutError) as e:
             raise LlmTransientError(detail="timeout") from e
         except RateLimitError as e:
             raise LlmTransientError(detail="rate_limited") from e
@@ -171,9 +169,7 @@ class LlmClient:
         choice = completion.choices[0]
         usage = completion.usage
         if usage is not None:
-            self._metrics.inc(
-                "llm_tokens_total", usage.prompt_tokens, model=model, direction="in"
-            )
+            self._metrics.inc("llm_tokens_total", usage.prompt_tokens, model=model, direction="in")
             self._metrics.inc(
                 "llm_tokens_total", usage.completion_tokens, model=model, direction="out"
             )

@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from spectus._core.structured_data import extract
 
-
 JSON_LD_PRODUCT = """
 <html><head>
 <script type="application/ld+json">

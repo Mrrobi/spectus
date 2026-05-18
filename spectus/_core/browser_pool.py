@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import asyncio
-from contextlib import asynccontextmanager
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager, suppress
 from dataclasses import dataclass, field
 from time import monotonic
-from typing import AsyncIterator
 
 from playwright.async_api import Browser, BrowserContext, Playwright, async_playwright
 
@@ -56,23 +56,17 @@ class BrowserPool:
         while not self._queue.empty():
             try:
                 pc = self._queue.get_nowait()
-                try:
+                with suppress(Exception):
                     await pc.ctx.close()
-                except Exception:
-                    pass
             except asyncio.QueueEmpty:
                 break
         if self._browser is not None:
-            try:
+            with suppress(Exception):
                 await self._browser.close()
-            except Exception:
-                pass
             self._browser = None
         if self._pw is not None:
-            try:
+            with suppress(Exception):
                 await self._pw.stop()
-            except Exception:
-                pass
             self._pw = None
         self._started = False
         self._log.info("browser_pool_stopped")
@@ -99,10 +93,8 @@ class BrowserPool:
             raise BrowserRenderError(detail="pool_unavailable", reason="pool_unavailable")
         pc = await self._queue.get()
         try:
-            try:
+            with suppress(Exception):
                 await pc.ctx.clear_cookies()
-            except Exception:
-                pass
             yield pc.ctx
         finally:
             pc.use_count += 1
@@ -111,10 +103,8 @@ class BrowserPool:
                 pc.use_count >= self._settings.browser_recycle_uses
                 or age > self._settings.browser_recycle_seconds
             ):
-                try:
+                with suppress(Exception):
                     await pc.ctx.close()
-                except Exception:
-                    pass
                 try:
                     pc = await self._new_pooled()
                 except Exception as e:

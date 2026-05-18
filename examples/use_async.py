@@ -2,6 +2,7 @@
 
 Use this if your codebase already runs an event loop.
 """
+
 from __future__ import annotations
 
 import asyncio

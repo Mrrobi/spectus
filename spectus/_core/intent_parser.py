@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-from spectus.config import Settings
-from spectus.errors import SchemaGenerationError
 from spectus._llm.client import LlmClient
 from spectus._llm.prompts import INTENT_SYSTEM, INTENT_USER_TEMPLATE
 from spectus._schemas.intent import IntentSchema
+from spectus.config import Settings
+from spectus.errors import SchemaGenerationError
 
 
 class IntentParser:

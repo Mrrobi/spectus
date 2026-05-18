@@ -1,21 +1,17 @@
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import hashlib
-from time import monotonic
 from typing import Any
 from uuid import UUID
 
+from spectus._core.budget import BudgetTracker
+from spectus._core.bundle_builder import build_facts_bundle
+from spectus._core.merger import TaggedRecords, merge_tagged
 from spectus._core.pipeline import Pipeline
-from spectus.errors import (
-    BudgetExceededError,
-    ExtractionError,
-    ExtractionPlanError,
-    LlmTransientError,
-    NoRelevantDataError,
-    SchemaGenerationError,
-)
-from spectus.logging import get_logger, job_log_context
+from spectus._core.repair_manager import RepairContext
+from spectus._core.url_normalizer import normalize
 from spectus._schemas.api import ExtractionRequest, ExtractionResponse
 from spectus._schemas.diagnostics import Diagnostics
 from spectus._schemas.execution import ExtractionResult, FetchResult
@@ -23,12 +19,14 @@ from spectus._schemas.intent import IntentSchema
 from spectus._schemas.page import CompactPage
 from spectus._schemas.plan import ExtractionPlan
 from spectus._schemas.validation import ValidationReport
-from spectus._schemas.execution import ExtractionResult
-from spectus._core.budget import BudgetTracker
-from spectus._core.bundle_builder import build_facts_bundle
-from spectus._core.merger import TaggedRecords, merge_tagged
-from spectus._core.repair_manager import RepairContext
-from spectus._core.url_normalizer import normalize
+from spectus.errors import (
+    BudgetExceededError,
+    ExtractionError,
+    ExtractionPlanError,
+    LlmTransientError,
+    SchemaGenerationError,
+)
+from spectus.logging import get_logger, job_log_context
 
 
 def idempotency_key(url: str, instruction: str) -> str:
@@ -72,7 +70,11 @@ async def run_extraction(req: ExtractionRequest, deps: Pipeline) -> ExtractionRe
             )
             await deps.jobs.save_result(
                 job_id,
-                response.records if isinstance(response.records, list) else [response.records] if response.records else [],
+                response.records
+                if isinstance(response.records, list)
+                else [response.records]
+                if response.records
+                else [],
                 response.diagnostics.model_dump(mode="json"),
             )
             deps.metrics.inc("extraction_total", 1, status=response.status)
@@ -98,13 +100,11 @@ async def run_extraction(req: ExtractionRequest, deps: Pipeline) -> ExtractionRe
                 error_message=e.user_message()[:1990],
                 runtime_ms=int(budget.elapsed() * 1000),
             )
-            try:
+            with contextlib.suppress(Exception):
                 await deps.artifacts.write_error(
                     str(job_id),
                     {"code": e.code, "detail": e.detail, "message": e.user_message()},
                 )
-            except Exception:
-                pass
             log.warning("extraction_error", code=e.code, detail=e.detail)
             raise
 
@@ -146,9 +146,7 @@ async def _run_pipeline(
     await deps.artifacts.write_json(
         job_id_str, "compact.json", compact.model_dump(mode="json", exclude_none=True)
     )
-    await deps.artifacts.write_json(
-        job_id_str, "intent.json", intent.model_dump(mode="json")
-    )
+    await deps.artifacts.write_json(job_id_str, "intent.json", intent.model_dump(mode="json"))
 
     template = await deps.templates.find(url.domain, url.canonical, intent)
     template_used = False
@@ -178,7 +176,9 @@ async def _run_pipeline(
             t_report = deps.validator.validate(t_result, intent, compact)
             if t_report.good_enough:
                 await deps.templates.record_success(template.id, t_report.overall_score)
-                await _persist_artifacts(deps, job_id_str, template.plan, t_report, t_result, intent)
+                await _persist_artifacts(
+                    deps, job_id_str, template.plan, t_report, t_result, intent
+                )
                 return _build_response(
                     job_id=job_id,
                     req=req,
@@ -232,8 +232,11 @@ async def _run_pipeline(
     budget.assert_at_least(1.5, "planner")
     try:
         plan: ExtractionPlan = await deps.planner.plan(
-            req.instruction, intent, compact,
-            job_id=job_id_str, artifact_writer=deps.artifacts,
+            req.instruction,
+            intent,
+            compact,
+            job_id=job_id_str,
+            artifact_writer=deps.artifacts,
         )
     except LlmTransientError:
         raise
@@ -244,12 +247,8 @@ async def _run_pipeline(
         plan, html_for_exec, url.canonical, intent, req.options.max_records
     )
     report = deps.validator.validate(result, intent, compact)
-    await deps.artifacts.write_json(
-        job_id_str, "plan.json", plan.model_dump(mode="json")
-    )
-    await deps.artifacts.write_json(
-        job_id_str, "validation.json", report.model_dump(mode="json")
-    )
+    await deps.artifacts.write_json(job_id_str, "plan.json", plan.model_dump(mode="json"))
+    await deps.artifacts.write_json(job_id_str, "validation.json", report.model_dump(mode="json"))
 
     while report.needs_repair and repair_attempts < 2 and budget.remaining() > 8.0:
         repair_attempts += 1
@@ -287,9 +286,7 @@ async def _run_pipeline(
             break
 
     run_semantic = (
-        intent.expected_output == "object"
-        or not report.good_enough
-        or repair_attempts > 0
+        intent.expected_output == "object" or not report.good_enough or repair_attempts > 0
     )
     if run_semantic and budget.remaining() > 8.0:
         log.info("semantic_run_start", reason_quality=report.overall_score)
@@ -306,11 +303,14 @@ async def _run_pipeline(
             )
             sem_report = deps.validator.validate(sem_result, intent, compact)
             await deps.artifacts.write_json(
-                job_id_str, "semantic_result.json",
+                job_id_str,
+                "semantic_result.json",
                 {"records": sem_result.records, "strategy": sem_result.strategy_used},
             )
             await deps.artifacts.write_json(
-                job_id_str, "semantic_validation.json", sem_report.model_dump(mode="json"),
+                job_id_str,
+                "semantic_validation.json",
+                sem_report.model_dump(mode="json"),
             )
 
             merged_records = merge_tagged(
@@ -333,7 +333,9 @@ async def _run_pipeline(
             )
             merged_report = deps.validator.validate(merged_result, intent, compact)
             await deps.artifacts.write_json(
-                job_id_str, "merged_validation.json", merged_report.model_dump(mode="json"),
+                job_id_str,
+                "merged_validation.json",
+                merged_report.model_dump(mode="json"),
             )
 
             candidates = [
@@ -341,9 +343,7 @@ async def _run_pipeline(
                 ("semantic", sem_result, sem_report),
                 ("standard", result, report),
             ]
-            best_name, best_result, best_report = max(
-                candidates, key=lambda x: x[2].overall_score
-            )
+            best_name, best_result, best_report = max(candidates, key=lambda x: x[2].overall_score)
             log.info(
                 "result_pick",
                 pick=best_name,
@@ -381,13 +381,9 @@ async def _run_pipeline(
             warnings.append("no records produced; review compact representation")
 
     runtime_ms = int(budget.elapsed() * 1000)
-    deps.metrics.observe(
-        "extraction_latency_ms", runtime_ms, mode=static_or_browser
-    )
+    deps.metrics.observe("extraction_latency_ms", runtime_ms, mode=static_or_browser)
     deps.metrics.observe("quality_score", report.overall_score, mode=static_or_browser)
-    deps.metrics.inc(
-        "extraction_strategy_used", 1, strategy=plan.strategy
-    )
+    deps.metrics.inc("extraction_strategy_used", 1, strategy=plan.strategy)
 
     return _build_response(
         job_id=job_id,

@@ -151,8 +151,10 @@ class InternalError(ExtractionError):
     user_message_template = "Unexpected internal error."
 
 
-SOFT_ERROR_CODES = frozenset({
-    "partial_success",
-    "validation_failed",
-    "no_relevant_data_found",
-})
+SOFT_ERROR_CODES = frozenset(
+    {
+        "partial_success",
+        "validation_failed",
+        "no_relevant_data_found",
+    }
+)

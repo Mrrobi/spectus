@@ -11,10 +11,10 @@ from urllib.robotparser import RobotFileParser
 import httpx
 from pydantic import BaseModel, ConfigDict
 
+from spectus._core.url_normalizer import NormalizedUrl
 from spectus.config import Settings
 from spectus.errors import BlockedByRobotsError, BlockedUrlError, FetchError
 from spectus.logging import get_logger
-from spectus._core.url_normalizer import NormalizedUrl
 
 RobotsDecision = Literal["allowed", "disallowed", "no_robots"]
 
@@ -97,12 +97,11 @@ class ComplianceChecker:
                 or ip.is_reserved
                 or ip.is_multicast
                 or ip.is_unspecified
-            ):
-                if not self._settings.allow_private_targets:
-                    raise BlockedUrlError(
-                        detail=f"private_or_internal_ip:{ip}",
-                        reason=f"private_ip:{ip}",
-                    )
+            ) and not self._settings.allow_private_targets:
+                raise BlockedUrlError(
+                    detail=f"private_or_internal_ip:{ip}",
+                    reason=f"private_ip:{ip}",
+                )
 
     async def _robots_check(self, url: NormalizedUrl) -> RobotsDecision:
         rule = self._robots_cache.get(url.domain)
@@ -119,7 +118,7 @@ class ComplianceChecker:
         robots_url = f"{url.scheme}://{url.host}/robots.txt"
         try:
             r = await self._http.get(robots_url, timeout=3.0)
-        except (httpx.HTTPError, asyncio.TimeoutError) as e:
+        except (TimeoutError, httpx.HTTPError) as e:
             self._log.info("robots_fetch_failed", domain=url.domain, error=str(e))
             return _RobotsRule(parser=None, fetched_at=monotonic(), failed=True)
         if r.status_code >= 400:

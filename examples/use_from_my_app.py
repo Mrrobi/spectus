@@ -8,6 +8,7 @@ Setup (one-time, from a venv where spectus is installed):
 
 Then in your code:
 """
+
 from __future__ import annotations
 
 import json
@@ -20,8 +21,7 @@ def main() -> None:
     result = extract(
         url="https://news.ycombinator.com/",
         instruction=(
-            "Extract the top stories. For each: title, points, author, "
-            "comments_count, story_url."
+            "Extract the top stories. For each: title, points, author, comments_count, story_url."
         ),
         max_records=10,
     )

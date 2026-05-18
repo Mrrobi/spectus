@@ -4,7 +4,6 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from spectus.config import Settings
     from spectus._core.artifacts import ArtifactsWriter
     from spectus._core.browser_pool import BrowserPool
     from spectus._core.browser_renderer import BrowserRenderer
@@ -19,27 +18,28 @@ if TYPE_CHECKING:
     from spectus._core.static_fetcher import StaticFetcher
     from spectus._core.template_manager import TemplateManager
     from spectus._core.validator import Validator
-    from spectus._db.repositories import ArtifactRepo, JobRepo, TemplateRepo
+    from spectus._db.repositories import ArtifactRepo, JobRepo
     from spectus._llm.client import LlmClient
+    from spectus.config import Settings
 
 
 @dataclass(frozen=True)
 class Pipeline:
-    settings: "Settings"
-    jobs: "JobRepo"
-    artifact_repo: "ArtifactRepo"
-    templates: "TemplateManager"
-    artifacts: "ArtifactsWriter"
-    compliance: "ComplianceChecker"
-    static_fetcher: "StaticFetcher"
-    browser_pool: "BrowserPool"
-    browser_renderer: "BrowserRenderer"
-    page_analyzer: "PageAnalyzer"
-    intent_parser: "IntentParser"
-    planner: "ExtractionPlanner"
-    executor: "ExtractionExecutor"
-    validator: "Validator"
-    repair_mgr: "RepairManager"
-    semantic: "SemanticExtractor"
-    llm: "LlmClient"
-    metrics: "Metrics"
+    settings: Settings
+    jobs: JobRepo
+    artifact_repo: ArtifactRepo
+    templates: TemplateManager
+    artifacts: ArtifactsWriter
+    compliance: ComplianceChecker
+    static_fetcher: StaticFetcher
+    browser_pool: BrowserPool
+    browser_renderer: BrowserRenderer
+    page_analyzer: PageAnalyzer
+    intent_parser: IntentParser
+    planner: ExtractionPlanner
+    executor: ExtractionExecutor
+    validator: Validator
+    repair_mgr: RepairManager
+    semantic: SemanticExtractor
+    llm: LlmClient
+    metrics: Metrics

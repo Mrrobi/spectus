@@ -33,10 +33,11 @@ Reusable client (sync wrapper):
         r1 = client.extract(url1, instruction1)
         r2 = client.extract(url2, instruction2)
 """
+
 from __future__ import annotations
 
-__version__ = "0.2.1"
+__version__ = "0.2.2"
 
 from spectus.client import Client, SyncClient, extract
 
-__all__ = ["Client", "SyncClient", "extract", "__version__"]
+__all__ = ["Client", "SyncClient", "__version__", "extract"]

@@ -7,6 +7,7 @@ Subcommands:
     spectus install-browsers
     spectus version
 """
+
 from __future__ import annotations
 
 import argparse
@@ -20,8 +21,9 @@ from spectus import __version__
 
 
 def _migrate(_: argparse.Namespace) -> int:
-    from alembic import command
     from alembic.config import Config
+
+    from alembic import command
 
     cfg_path = Path(__file__).resolve().parent.parent / "alembic.ini"
     if not cfg_path.exists():

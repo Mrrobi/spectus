@@ -18,18 +18,32 @@ class NormalizedUrl(BaseModel):
     scheme: str
 
 
-_TRACKING_PARAMS = frozenset({
-    "utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content",
-    "gclid", "fbclid", "yclid", "mc_cid", "mc_eid", "ref", "ref_src",
-    "_hsenc", "_hsmi",
-})
+_TRACKING_PARAMS = frozenset(
+    {
+        "utm_source",
+        "utm_medium",
+        "utm_campaign",
+        "utm_term",
+        "utm_content",
+        "gclid",
+        "fbclid",
+        "yclid",
+        "mc_cid",
+        "mc_eid",
+        "ref",
+        "ref_src",
+        "_hsenc",
+        "_hsmi",
+    }
+)
 
 
 def _clean_query(query: str) -> str:
     if not query:
         return ""
     pairs = [
-        (k, v) for k, v in parse_qsl(query, keep_blank_values=True)
+        (k, v)
+        for k, v in parse_qsl(query, keep_blank_values=True)
         if k.lower() not in _TRACKING_PARAMS
     ]
     pairs.sort()

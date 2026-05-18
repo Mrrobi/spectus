@@ -1,11 +1,9 @@
 from __future__ import annotations
 
-import pytest
-
+from spectus._core.validator import Validator
 from spectus._schemas.execution import ExtractionResult
 from spectus._schemas.intent import FieldSpec, IntentSchema
 from spectus._schemas.page import CompactPage
-from spectus._core.validator import Validator
 
 
 def _intent(fields, expected_output="array"):
@@ -20,6 +18,7 @@ def _intent(fields, expected_output="array"):
 def _compact(containers: int = 0):
     if containers:
         from spectus._schemas.page import CandidateSection
+
         return CompactPage(
             url="http://x",
             candidate_sections=[
@@ -44,10 +43,12 @@ def test_empty_records_array_triggers_repair():
 
 
 def test_full_coverage_high_score():
-    schema = _intent([
-        FieldSpec(name="title", type="string", required=True),
-        FieldSpec(name="price", type="currency", required=True),
-    ])
+    schema = _intent(
+        [
+            FieldSpec(name="title", type="string", required=True),
+            FieldSpec(name="price", type="currency", required=True),
+        ]
+    )
     records = [
         {"title": "Nike Runner", "price": "$89.99"},
         {"title": "Adidas Boost", "price": "$129.99"},
@@ -61,10 +62,12 @@ def test_full_coverage_high_score():
 
 
 def test_missing_required_triggers_repair():
-    schema = _intent([
-        FieldSpec(name="title", type="string", required=True),
-        FieldSpec(name="price", type="currency", required=True),
-    ])
+    schema = _intent(
+        [
+            FieldSpec(name="title", type="string", required=True),
+            FieldSpec(name="price", type="currency", required=True),
+        ]
+    )
     records = [{"title": "A"}, {"title": "B"}, {"title": "C"}]
     result = ExtractionResult(
         status="success", strategy_used="repeated_dom_selector", records=records

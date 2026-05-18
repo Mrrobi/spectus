@@ -10,6 +10,7 @@ Heuristics:
 - For string/list_string, prefer shorter to avoid page-dump artifacts.
 - Tie-break: shorter value wins (avoids dumps).
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -51,7 +52,7 @@ def _length_of(v: Any) -> int:
 
 
 def _is_plausible(v: Any, ftype: FieldType) -> bool:
-    if v is None or v == "" or v == []:
+    if v is None or v in ("", []):
         return False
     n = _length_of(v)
     if n > _MAX_LEN_FOR_TYPE.get(ftype, 4000):
@@ -128,5 +129,7 @@ def merge_records(
     sources = []
     labels = ("standard", "semantic", "other")
     for i, recs in enumerate(records_lists):
-        sources.append(TaggedRecords(source=labels[i] if i < len(labels) else f"src_{i}", records=recs))
+        sources.append(
+            TaggedRecords(source=labels[i] if i < len(labels) else f"src_{i}", records=recs)
+        )
     return merge_tagged(sources, schema)

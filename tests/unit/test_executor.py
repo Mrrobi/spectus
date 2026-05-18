@@ -2,12 +2,11 @@ from __future__ import annotations
 
 import pytest
 
-from spectus.config import Settings
-from spectus._schemas.intent import FieldSpec, IntentSchema
-from spectus._schemas.plan import ExtractionPlan, FieldSelector
 from spectus._core.extraction_executor import ExtractionExecutor
 from spectus._core.normalizer import FieldNormalizer
-
+from spectus._schemas.intent import FieldSpec, IntentSchema
+from spectus._schemas.plan import ExtractionPlan, FieldSelector
+from spectus.config import Settings
 
 HTML = """
 <html><body>

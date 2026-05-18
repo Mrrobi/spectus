@@ -1,14 +1,13 @@
 from __future__ import annotations
 
-import asyncio
 from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from spectus.config import Settings
-from spectus.errors import BlockedUrlError
 from spectus._core.compliance import ComplianceChecker, _TokenBucket
 from spectus._core.url_normalizer import normalize
+from spectus.config import Settings
+from spectus.errors import BlockedUrlError
 
 
 @pytest.mark.asyncio

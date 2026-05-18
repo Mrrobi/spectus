@@ -7,21 +7,22 @@ that schema, then values are normalized through FieldNormalizer.
 Resilient to DOM shuffles because the input is text + labels + anchors +
 structured data, not selectors.
 """
+
 from __future__ import annotations
 
 import json
-from typing import Any, Type, get_args
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field, create_model
 
-from spectus.config import Settings
-from spectus.errors import ExtractionPlanError, SchemaGenerationError
+from spectus._core.normalizer import FieldNormalizer
 from spectus._llm.client import LlmClient
 from spectus._llm.prompts import SEMANTIC_SYSTEM, SEMANTIC_USER_TEMPLATE
 from spectus._schemas.bundle import FactsBundle
 from spectus._schemas.execution import ExtractionResult, FieldStat
 from spectus._schemas.intent import FieldType, IntentSchema
-from spectus._core.normalizer import FieldNormalizer
+from spectus.config import Settings
+from spectus.errors import ExtractionPlanError, SchemaGenerationError
 
 _TYPE_MAP: dict[FieldType, Any] = {
     "string": str,
@@ -37,7 +38,7 @@ _TYPE_MAP: dict[FieldType, Any] = {
 }
 
 
-def _record_model(intent: IntentSchema) -> Type[BaseModel]:
+def _record_model(intent: IntentSchema) -> type[BaseModel]:
     fields_def: dict[str, Any] = {}
     for f in intent.fields:
         base = _TYPE_MAP[f.type]
@@ -52,7 +53,7 @@ def _record_model(intent: IntentSchema) -> Type[BaseModel]:
     return Record
 
 
-def _envelope_model(intent: IntentSchema) -> Type[BaseModel]:
+def _envelope_model(intent: IntentSchema) -> type[BaseModel]:
     Record = _record_model(intent)
     if intent.expected_output == "object":
         Envelope = create_model(
@@ -125,7 +126,7 @@ class SemanticExtractor:
         for rec in records:
             for f in intent.fields:
                 raw = rec.get(f.name)
-                if raw is None or raw == "" or raw == []:
+                if raw is None or raw in ("", []):
                     stats[f.name] = FieldStat(
                         hits=stats[f.name].hits,
                         misses=stats[f.name].misses + 1,

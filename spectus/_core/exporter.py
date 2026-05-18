@@ -12,7 +12,7 @@ def records_to_csv(records: list[dict[str, Any]], fieldnames: list[str] | None =
         seen: list[str] = []
         seen_set: set[str] = set()
         for r in records:
-            for k in r.keys():
+            for k in r:
                 if k not in seen_set:
                     seen.append(k)
                     seen_set.add(k)

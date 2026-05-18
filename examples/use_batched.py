@@ -1,11 +1,11 @@
 """Example: batched extraction. Reuses the browser pool — much faster than
 calling `extract()` once per URL."""
+
 from __future__ import annotations
 
 import json
 
 from spectus import SyncClient
-
 
 URLS_AND_INSTRUCTIONS = [
     (

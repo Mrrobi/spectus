@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import contextlib
 import re
 from typing import Any
 from urllib.parse import urljoin
@@ -7,13 +8,13 @@ from urllib.parse import urljoin
 import regex
 from selectolax.parser import HTMLParser, Node
 
-from spectus.config import Settings
-from spectus.errors import InvalidSelectorError
-from spectus.logging import get_logger
+from spectus._core.normalizer import FieldNormalizer
 from spectus._schemas.execution import ExtractionResult, FieldStat
 from spectus._schemas.intent import IntentSchema
 from spectus._schemas.plan import ExtractionPlan, FieldSelector
-from spectus._core.normalizer import FieldNormalizer
+from spectus.config import Settings
+from spectus.errors import InvalidSelectorError
+from spectus.logging import get_logger
 
 _MAX_ELEMENTS_PER_SELECTOR = 500
 _WS_RE = re.compile(r"\s+")
@@ -32,9 +33,7 @@ def is_safe_selector(selector: str | None) -> bool:
         return False
     if len(selector) > 500:
         return False
-    if _UNSUPPORTED_SELECTOR_RE.search(selector):
-        return False
-    return True
+    return not _UNSUPPORTED_SELECTOR_RE.search(selector)
 
 
 def _split_compound(selector: str) -> list[str]:
@@ -71,7 +70,7 @@ def _split_compound(selector: str) -> list[str]:
     return parts
 
 
-def _resolve_selector(root: "Node", selector: str) -> list["Node"]:
+def _resolve_selector(root: Node, selector: str) -> list[Node]:
     """CSS query with translation for jQuery `:contains('text')`.
 
     `:has(...)`, `:is(...)`, etc remain rejected (lexbor cannot parse).
@@ -118,7 +117,7 @@ def _resolve_selector(root: "Node", selector: str) -> list["Node"]:
     return out[:_MAX_ELEMENTS_PER_SELECTOR]
 
 
-def _resolve_selector_first(root: "Node", selector: str) -> "Node | None":
+def _resolve_selector_first(root: Node, selector: str) -> Node | None:
     nodes = _resolve_selector(root, selector)
     return nodes[0] if nodes else None
 
@@ -522,10 +521,8 @@ class ExtractionExecutor:
             return None
         raw = raw.strip()
         if fs.attribute in ("href", "src") and raw:
-            try:
+            with contextlib.suppress(ValueError, TypeError):
                 raw = urljoin(base_url, raw)
-            except (ValueError, TypeError):
-                pass
         return raw or None
 
     def _safe_css(self, root: Node, selector: str) -> list[Node]:

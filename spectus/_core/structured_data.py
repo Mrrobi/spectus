@@ -11,11 +11,11 @@ _NEXT_DATA_RE = re.compile(
     re.IGNORECASE | re.DOTALL,
 )
 _NUXT_DATA_RE = re.compile(
-    r'window\.__NUXT__\s*=\s*(\{.*?\});',
+    r"window\.__NUXT__\s*=\s*(\{.*?\});",
     re.IGNORECASE | re.DOTALL,
 )
 _INITIAL_STATE_RE = re.compile(
-    r'window\.__INITIAL_STATE__\s*=\s*(\{.*?\});',
+    r"window\.__INITIAL_STATE__\s*=\s*(\{.*?\});",
     re.IGNORECASE | re.DOTALL,
 )
 _JSON_LD_RE = re.compile(
@@ -70,9 +70,7 @@ def extract(html: str) -> StructuredDataSummary:
                 json_ld_types.append(t)
             elif isinstance(t, list):
                 json_ld_types.extend(str(x) for x in t if isinstance(x, (str, int)))
-            payloads.append(
-                StructuredPayload(source="json-ld", payload=_truncate_payload(item))
-            )
+            payloads.append(StructuredPayload(source="json-ld", payload=_truncate_payload(item)))
             if len(payloads) >= 5:
                 break
 

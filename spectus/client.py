@@ -1,14 +1,16 @@
 """spectus public client. Thin wrapper around the in-process pipeline."""
+
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import os
 import threading
 from pathlib import Path
 from typing import Any
 
-from spectus._schemas.api import ExtractionResponse
 from spectus._core.extractor import Extractor
+from spectus._schemas.api import ExtractionResponse
 
 
 def _ensure_db() -> None:
@@ -23,8 +25,9 @@ def _ensure_db() -> None:
     if db_file.exists() and db_file.stat().st_size > 0:
         return
     try:
-        from alembic import command
         from alembic.config import Config
+
+        from alembic import command
 
         cfg_path = Path(__file__).resolve().parent.parent / "alembic.ini"
         if not cfg_path.exists():
@@ -54,28 +57,30 @@ def _response_to_dict(resp: ExtractionResponse) -> dict[str, Any]:
     }
 
 
-_SETTABLE_KEYS = frozenset({
-    "openai_api_key",
-    "openai_model_intent",
-    "openai_model_plan",
-    "openai_model_repair",
-    "db_url",
-    "artifacts_dir",
-    "metrics_path",
-    "user_agent",
-    "browser_pool_size",
-    "browser_headless",
-    "rate_limit_rps",
-    "rate_limit_burst",
-    "allow_private_targets",
-    "job_deadline_sec",
-    "llm_intent_timeout_sec",
-    "llm_planner_timeout_sec",
-    "llm_repair_timeout_sec",
-    "max_records_hard_cap",
-    "max_html_bytes",
-    "log_level",
-})
+_SETTABLE_KEYS = frozenset(
+    {
+        "openai_api_key",
+        "openai_model_intent",
+        "openai_model_plan",
+        "openai_model_repair",
+        "db_url",
+        "artifacts_dir",
+        "metrics_path",
+        "user_agent",
+        "browser_pool_size",
+        "browser_headless",
+        "rate_limit_rps",
+        "rate_limit_burst",
+        "allow_private_targets",
+        "job_deadline_sec",
+        "llm_intent_timeout_sec",
+        "llm_planner_timeout_sec",
+        "llm_repair_timeout_sec",
+        "max_records_hard_cap",
+        "max_html_bytes",
+        "log_level",
+    }
+)
 
 
 def _collect_overrides(
@@ -107,7 +112,7 @@ class Client:
         browser: bool = True,
         log_level: str = "WARNING",
         settings: dict | None = None,
-    ) -> "Client":
+    ) -> Client:
         """Create a new client.
 
         :param openai_api_key: override OPENAI_API_KEY for this client. If
@@ -148,7 +153,7 @@ class Client:
     async def close(self) -> None:
         await self._extractor.close()
 
-    async def __aenter__(self) -> "Client":
+    async def __aenter__(self) -> Client:
         return self
 
     async def __aexit__(self, *exc: Any) -> None:
@@ -175,7 +180,7 @@ class SyncClient:
         browser: bool = True,
         log_level: str = "WARNING",
         settings: dict | None = None,
-    ) -> "SyncClient":
+    ) -> SyncClient:
         sc = cls()
         sc._start(
             openai_api_key=openai_api_key,
@@ -244,10 +249,8 @@ class SyncClient:
         if self._loop is None or self._client is None:
             return
         future = asyncio.run_coroutine_threadsafe(self._client.close(), self._loop)
-        try:
+        with contextlib.suppress(Exception):
             future.result(timeout=30)
-        except Exception:
-            pass
         self._loop.call_soon_threadsafe(self._loop.stop)
         if self._thread is not None:
             self._thread.join(timeout=10)
@@ -255,7 +258,7 @@ class SyncClient:
         self._client = None
         self._thread = None
 
-    def __enter__(self) -> "SyncClient":
+    def __enter__(self) -> SyncClient:
         return self
 
     def __exit__(self, *exc: Any) -> None:
@@ -310,6 +313,7 @@ def extract(
         # Running event loop (Jupyter, IPython, FastAPI route, etc).
         # Run the coroutine in a dedicated background thread with its own loop.
         import concurrent.futures
+
         with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
             return pool.submit(lambda: asyncio.run(_run())).result()
     return asyncio.run(_run())

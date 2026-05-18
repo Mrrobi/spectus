@@ -4,6 +4,7 @@ Useful when your codebase already has secrets in its own config — e.g. AWS
 Secrets Manager, Vault, Django settings, .env loaded by python-dotenv into
 your own namespace.
 """
+
 from __future__ import annotations
 
 import json
