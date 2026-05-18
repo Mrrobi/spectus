@@ -11,8 +11,7 @@
 <p align="center">
   <a href="https://pypi.org/project/spectus/"><img src="https://img.shields.io/pypi/v/spectus.svg" alt="PyPI"></a>
   <a href="https://pypi.org/project/spectus/"><img src="https://img.shields.io/pypi/pyversions/spectus.svg" alt="Python"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License: MIT"></a>
-  <a href="https://github.com/Mrrobi/spectus/actions"><img src="https://img.shields.io/github/actions/workflow/status/Mrrobi/spectus/test.yml?branch=main&label=tests" alt="CI"></a>
+  <a href="https://github.com/Mrrobi/spectus/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License: MIT"></a>
 </p>
 
 **spectus** — paste a URL, describe what you want in plain English, get structured JSON or CSV. Resilient to DOM changes: when CSS selectors fail, falls back automatically to **semantic LLM extraction** over a facts bundle (structured data + visible text + anchors + label-value pairs). Same loop on any site; no per-site rules.
@@ -81,7 +80,7 @@ result = await client.extract(url, instruction)
 await client.close()
 ```
 
-More patterns in [`EXAMPLES.md`](EXAMPLES.md).
+More patterns in [EXAMPLES.md](https://github.com/Mrrobi/spectus/blob/main/EXAMPLES.md).
 
 ---
 
@@ -95,9 +94,9 @@ More patterns in [`EXAMPLES.md`](EXAMPLES.md).
 
 ---
 
-## What output you get
+## What you get back
 
-`spectus` always returns a plain `dict`:
+`extract()` always returns a plain `dict`:
 
 ```python
 {
@@ -128,7 +127,7 @@ More patterns in [`EXAMPLES.md`](EXAMPLES.md).
 
 ---
 
-## Architecture (one paragraph)
+## How it works (one paragraph)
 
 Every request runs: URL normalize → SSRF + robots + rate-limit → parallel(intent-LLM, static-fetch + analyze) → template lookup → planner-LLM → executor → validator → repair loop (≤ 2 attempts) → **resilience pass: semantic LLM extraction over a facts bundle, per-field merge with type-aware tie-breakers** → save winning strategy as template → return JSON or CSV with diagnostics.
 
@@ -143,8 +142,6 @@ Seven extraction strategies, chosen automatically:
 | `article_extraction` | Long-form content (article, blog, encyclopedia) |
 | `visible_text_regex` | Fallback regex over visible text |
 | `semantic_extraction` | LLM reads facts bundle — no DOM dependency, **survives DOM redesigns** |
-
-Stack: Python 3.12 · Pydantic v2 (strict) · SQLAlchemy 2.0 async · SQLite (swap to Postgres via `DB_URL`) · selectolax · Playwright · OpenAI Structured Outputs · structlog · trafilatura.
 
 ---
 
@@ -195,28 +192,14 @@ Set via env var (or pass to `Client.create(settings={...})`).
 
 ---
 
-## Develop from source
+## Links
 
-```bash
-git clone https://github.com/Mrrobi/spectus
-cd spectus
-uv sync --extra dev --extra notebook
-uv run playwright install chromium
-uv run alembic upgrade head
-cp .env.example .env                  # add your OPENAI_API_KEY
-
-make test         # unit tests
-make lint         # ruff
-make typecheck    # mypy strict
-make notebook     # JupyterLab on notebooks/personal.ipynb
-```
-
-CI runs on every push to `main` and every PR (Linux + Windows + macOS).
-
-Release flow: bump `version` in `pyproject.toml` → `git tag vX.Y.Z` → push → GitHub Actions builds + publishes to PyPI via Trusted Publisher OIDC and creates a GitHub release.
+- **Examples**: [EXAMPLES.md](https://github.com/Mrrobi/spectus/blob/main/EXAMPLES.md) — 12 recipes
+- **Source / issues**: [github.com/Mrrobi/spectus](https://github.com/Mrrobi/spectus)
+- **Contributing / dev loop**: [CONTRIBUTING.md](https://github.com/Mrrobi/spectus/blob/main/CONTRIBUTING.md)
 
 ---
 
 ## License
 
-[MIT](LICENSE) © 2026 Mrrobi
+[MIT](https://github.com/Mrrobi/spectus/blob/main/LICENSE) © 2026 Mrrobi
