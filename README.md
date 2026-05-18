@@ -11,6 +11,7 @@
 <p align="center">
   <a href="https://pypi.org/project/spectus/"><img src="https://img.shields.io/pypi/v/spectus.svg" alt="PyPI"></a>
   <a href="https://pypi.org/project/spectus/"><img src="https://img.shields.io/pypi/pyversions/spectus.svg" alt="Python"></a>
+  <a href="https://github.com/Mrrobi/spectus/actions/workflows/test.yml"><img src="https://img.shields.io/github/actions/workflow/status/Mrrobi/spectus/test.yml?branch=main&label=tests" alt="tests"></a>
   <a href="https://github.com/Mrrobi/spectus/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License: MIT"></a>
 </p>
 
@@ -33,7 +34,7 @@ spectus install-browsers              # one-time Playwright Chromium download (~
 export OPENAI_API_KEY=sk-...          # Windows PowerShell:  $env:OPENAI_API_KEY="sk-..."
 ```
 
-Requires Python 3.12+. Linux / macOS / Windows.
+Requires Python 3.10+ (tested on 3.10 / 3.11 / 3.12 / 3.13). Linux / macOS / Windows.
 
 ---
 
