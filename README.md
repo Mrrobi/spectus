@@ -9,56 +9,38 @@ Mercurial, 20 years and counting,70,ibobev,3,https://fosdem.org/...
 ...
 ```
 
+[![PyPI](https://img.shields.io/pypi/v/spectus.svg)](https://pypi.org/project/spectus/) [![Python](https://img.shields.io/pypi/pyversions/spectus.svg)](https://pypi.org/project/spectus/) [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 ---
 
-## Install — pick one
+## Install
 
-### 1. Docker (any OS)
-
-```
-docker compose up -d --build
-```
-
-Server on `http://localhost:8000`. Volume `spectus-data` persists DB + artifacts.
-
-One-shot extract via the image:
-
-```
-docker run --rm --env-file .env -v spectus-data:/data spectus:latest \
-    spectus extract https://example.com/products "extract title, price, link"
-```
-
-### 2. pip / uv (Python 3.12+ on Win/Linux/Mac)
-
-```
+```bash
 pip install spectus                   # or:  uv tool install spectus
-spectus install-browsers              # one-time playwright chromium download
+spectus install-browsers              # one-time playwright chromium download (~110 MB)
 spectus migrate                       # apply DB migrations
 export OPENAI_API_KEY=sk-...          # Windows:  setx OPENAI_API_KEY sk-...
-spectus serve                         # API on :8000
 ```
 
-Or one-shot from the shell, no server:
-
-```
-spectus extract https://example.com "Extract titles and prices" --output csv > out.csv
-```
-
-### 3. From source
-
-```
-git clone <repo>
-cd spectus
-uv sync --extra dev --extra notebook
-uv run playwright install chromium
-uv run alembic upgrade head
-cp .env.example .env                  # add your OPENAI_API_KEY
-uv run spectus serve
-```
+Requires Python 3.12+. Works on Linux, macOS, and Windows.
 
 ---
 
-## Use in your codebase
+## Use
+
+### CLI — one-shot
+
+```bash
+spectus extract https://example.com/products "Extract title, price, rating, and product URL" --output json
+spectus extract https://news.ycombinator.com/ "Top stories: title, points, author" --output csv > out.csv
+```
+
+### CLI — server mode
+
+```bash
+spectus serve                         # API on http://localhost:8000
+spectus serve --host 0.0.0.0 --port 9000
+```
 
 ### Python — one-shot
 
@@ -97,7 +79,9 @@ await client.close()
 
 ### Any language — HTTP API
 
-```
+```bash
+spectus serve
+# then:
 curl -s http://localhost:8000/api/extractions \
   -H 'content-type: application/json' \
   -d '{"url":"https://example.com","instruction":"extract titles and prices"}' \
@@ -106,7 +90,9 @@ curl -s http://localhost:8000/api/extractions \
 
 ### Jupyter notebook
 
-```
+```bash
+spectus install-browsers
+# clone the repo, then:
 make notebook        # opens notebooks/personal.ipynb in JupyterLab
 ```
 
@@ -198,14 +184,15 @@ POST /api/extractions
   -> return JSON or CSV with diagnostics
 ```
 
-Seven extraction strategies:
+Seven extraction strategies, chosen automatically:
+
 - `structured_data` — JSON-LD / OpenGraph / `__NEXT_DATA__` / `__NUXT__`
 - `single_dom_selector` — page-level CSS
-- `repeated_dom_selector` — repeating container CSS
-- `table_extraction` — HTML tables
-- `article_extraction` — trafilatura
-- `visible_text_regex` — regex over visible text
-- `semantic_extraction` — LLM reads facts bundle (text + anchors + labels), no DOM dependency — survives redesigns
+- `repeated_dom_selector` — repeating container CSS (lists, grids)
+- `table_extraction` — HTML tables with header→field mapping
+- `article_extraction` — trafilatura (clean article body + metadata)
+- `visible_text_regex` — regex over visible text (fallback)
+- `semantic_extraction` — LLM reads a facts bundle (text + anchors + labels + KV pairs), no DOM dependency — survives redesigns
 
 Stack: Python 3.12 · FastAPI · Pydantic v2 (strict) · SQLAlchemy 2.0 async · SQLite (swap to Postgres via `DB_URL`) · selectolax · Playwright · OpenAI Structured Outputs · structlog · trafilatura.
 
@@ -213,27 +200,48 @@ Stack: Python 3.12 · FastAPI · Pydantic v2 (strict) · SQLAlchemy 2.0 async ·
 
 ## Configuration
 
-All settings in `.env` (see `.env.example`). Key vars:
+All settings via env vars or a `.env` file. Key vars:
 
 | Var | Default | Purpose |
 |---|---|---|
 | `OPENAI_API_KEY` | — | Required (or pass via `openai_api_key=` kwarg) |
 | `OPENAI_MODEL_INTENT` | `gpt-4o-mini` | Intent parser model |
 | `OPENAI_MODEL_PLAN` | `gpt-4.1` | Planner + repair + semantic model |
+| `OPENAI_MODEL_REPAIR` | `gpt-4.1` | Repair model |
 | `DB_URL` | `sqlite+aiosqlite:///./spectus.db` | Swap to `postgresql+asyncpg://...` for Postgres |
 | `ARTIFACTS_DIR` | `./artifacts` | Per-job debug bundles |
 | `BROWSER_POOL_SIZE` | `3` | Playwright contexts |
+| `BROWSER_HEADLESS` | `true` | Headless mode |
 | `RATE_LIMIT_RPS` | `1.0` | Per-domain token-bucket refill |
 | `ALLOW_PRIVATE_TARGETS` | `false` | Set `true` only for local fixture testing |
 | `JOB_DEADLINE_SEC` | `180` | Hard wall-time per request |
+| `LLM_INTENT_TIMEOUT_SEC` | `45` | Per-call timeout for intent parser |
+| `LLM_PLANNER_TIMEOUT_SEC` | `60` | Per-call timeout for planner |
+| `LLM_REPAIR_TIMEOUT_SEC` | `60` | Per-call timeout for repair |
 
 GPT-5 / o-series support: pass `OPENAI_MODEL_*=gpt-5-nano` and bump `LLM_*_TIMEOUT_SEC` (reasoning tokens take longer). Client auto-uses `max_completion_tokens` + `reasoning_effort=low` for those models.
+
+Pass overrides programmatically:
+
+```python
+from spectus import Client
+
+client = await Client.create(
+    openai_api_key="sk-...",
+    settings={
+        "openai_model_intent": "gpt-4o-mini",
+        "openai_model_plan":   "gpt-5-nano",
+        "browser_pool_size":   1,
+        "allow_private_targets": False,
+    },
+)
+```
 
 ---
 
 ## Compliance + safety (built-in)
 
-- SSRF: blocks private / loopback / link-local / reserved IPs before fetch.
+- SSRF: blocks private / loopback / link-local / reserved IPs before any fetch.
 - Robots.txt: 1h-TTL cache, fail-open on 5xx.
 - Per-domain rate-limit token bucket.
 - Allowed selector attributes: `text`, `href`, `src`, `alt`, `title`, `class`, `id`, `value`, `data-*`, `aria-*`. Anything else rejected at Pydantic boundary.
@@ -242,16 +250,30 @@ GPT-5 / o-series support: pass `OPENAI_MODEL_*=gpt-5-nano` and bump `LLM_*_TIMEO
 
 ---
 
-## Development
+## Develop from source
 
+```bash
+git clone https://github.com/Mrrobi/spectus
+cd spectus
+uv sync --extra dev --extra notebook
+uv run playwright install chromium
+uv run alembic upgrade head
+cp .env.example .env                  # add your OPENAI_API_KEY
+make dev                              # uvicorn --reload on :8000
 ```
-make dev          # uvicorn --reload on :8000
+
+```bash
 make test         # pytest -n auto with coverage
+make test-fast    # skip @browser-marked tests
 make lint         # ruff
+make format       # ruff fix + format
 make typecheck    # mypy strict
+make clean        # drop DB + artifacts + cache
 ```
 
 Suite: 52 unit tests, runs <1s offline. Plus `@pytest.mark.browser` for real Chromium.
+
+CI runs on every push to `main` and every PR (Linux + Windows + macOS). See `.github/workflows/`.
 
 ---
 
