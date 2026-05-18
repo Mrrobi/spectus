@@ -1,0 +1,51 @@
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+.git/
+.gitignore
+.github/
+.gitattributes
+
+# data + outputs
+artifacts/
+output/
+spectus.db
+spectus.db-*
+metrics.json
+.ipynb_checkpoints/
+
+# local secrets / scratch
+.env
+.env.local
+.env.test
+.tmp_*
+.tmp_*.py
+*.tmp.md
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Docs
+docs/
+*.md
+!README.md
+
+# Plan file (engineering doc, not needed in image)
+ai_scraping_system_v1_plan.md
+
+# tests fixtures (not needed in runtime image)
+tests/

@@ -1,0 +1,107 @@
+[project]
+name = "spectus"
+version = "0.1.0"
+description = "AI-assisted web data extractor — paste a URL + plain-English instruction, get structured JSON or CSV. Resilient to DOM changes via semantic LLM extraction."
+requires-python = ">=3.12"
+readme = "README.md"
+license = {text = "MIT"}
+keywords = ["scraping", "ai", "llm", "data-extraction", "playwright", "openai"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Internet :: WWW/HTTP",
+    "Topic :: Software Development :: Libraries",
+    "Framework :: FastAPI",
+]
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+    "pydantic>=2.7",
+    "pydantic-settings>=2.4",
+    "sqlalchemy[asyncio]>=2.0",
+    "aiosqlite>=0.20",
+    "alembic>=1.13",
+    "httpx[http2]>=0.27",
+    "selectolax>=0.3.21",
+    "lxml>=5.2",
+    "beautifulsoup4>=4.12",
+    "trafilatura>=1.12",
+    "playwright>=1.45",
+    "openai>=1.40",
+    "structlog>=24.4",
+    "python-dotenv>=1.0",
+    "tenacity>=9.0",
+    "extruct>=0.17",
+    "python-dateutil>=2.9",
+    "tldextract>=5.1",
+    "regex>=2024.7",
+    "orjson>=3.10",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3",
+    "pytest-asyncio>=0.24",
+    "pytest-cov>=5.0",
+    "pytest-xdist>=3.6",
+    "respx>=0.21",
+    "asgi-lifespan>=2.1",
+    "dirty-equals>=0.8",
+    "ruff>=0.6",
+    "mypy>=1.11",
+]
+notebook = [
+    "jupyterlab>=4.2",
+    "pandas>=2.2",
+    "ipywidgets>=8.1",
+]
+
+[project.scripts]
+spectus = "app.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/Mrrobi/spectus"
+Repository = "https://github.com/Mrrobi/spectus"
+Issues = "https://github.com/Mrrobi/spectus/issues"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["app*", "notebooks*", "alembic*", "spectus*"]
+
+[tool.setuptools.package-data]
+"alembic" = ["*.mako", "**/*.py"]
+"app" = ["prompts/*.md"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "PL", "SIM", "RUF"]
+ignore = ["E501", "PLR0913", "PLR0912", "PLR0915"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+warn_unused_ignores = true
+disallow_untyped_defs = true
+disallow_any_generics = true
+plugins = ["pydantic.mypy"]
+
+[[tool.mypy.overrides]]
+module = ["extruct.*", "selectolax.*", "trafilatura.*", "tldextract.*"]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+markers = [
+    "browser: tests that exercise real Chromium",
+]

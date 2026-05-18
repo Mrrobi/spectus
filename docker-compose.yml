@@ -1,0 +1,27 @@
+services:
+  spectus:
+    image: spectus:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: spectus
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      DB_URL: sqlite+aiosqlite:////data/spectus.db
+      ARTIFACTS_DIR: /data/artifacts
+      METRICS_PATH: /data/metrics.json
+    volumes:
+      - spectus-data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-fs", "http://127.0.0.1:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 45s
+
+volumes:
+  spectus-data:
