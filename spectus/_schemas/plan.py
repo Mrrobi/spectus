@@ -17,7 +17,27 @@ ExtractionStrategy = Literal[
     "semantic_extraction",
     "manual_fallback_failed",
 ]
-AllowedAttribute = Literal["text", "href", "src", "alt", "title", "class", "id", "value"]
+AllowedAttribute = Literal[
+    "text",
+    "href",
+    "src",
+    "srcset",
+    "alt",
+    "title",
+    "class",
+    "id",
+    "value",
+    "content",     # <meta content="...">, schema microdata, OpenGraph
+    "datetime",    # <time datetime="...">
+    "name",        # <meta name="...">, <input name="...">
+    "type",        # <input type="...">, <link type="...">
+    "role",
+    "placeholder",
+    "download",
+    "rel",
+    "property",    # <meta property="og:...">
+    "lang",
+]
 
 _DATA_ARIA_RE = re.compile(r"(data-|aria-)[a-z][a-z0-9\-]*")
 

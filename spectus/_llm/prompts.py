@@ -38,8 +38,10 @@ Selector rules:
 - Text-content matching: you MAY use :contains('text') on a tag, e.g. a:contains('salgsoppgave') or span:contains('Prisantydning'). Multiple needles can be ANDed by chaining: a:contains('komplett'):contains('salgsoppgave'). Quotes can be single or double; the runtime translates this to a text-filter post-CSS.
 - FORBIDDEN (crashes the parser): :has(...), :is(...), :where(...), :visible, :hidden, :eq(), :lt(), :gt(), :first(), :last(), :even, :odd, :hover, :focus, :checked, :enabled, :disabled. To select an element relative to a labeled sibling, use the adjacent (+) or general (~) sibling combinator instead, e.g. `h2:contains('Visning') + div` or `dt:contains('Prisantydning') + dd`.
 - For partial href / src match, prefer attribute-substring: [href*='salgsoppgave'] or [href$='.pdf'].
-- attribute must be one of: text, href, src, alt, title, class, id, value, or any data-*/aria-* attribute.
+- attribute must be one of: text, href, src, srcset, alt, title, class, id, value, content, datetime, name, type, role, placeholder, download, rel, property, lang, or any data-*/aria-* attribute.
 - Use attribute=class when a value is encoded in CSS class names (e.g. star ratings like "star-rating Three").
+- Use attribute=content for <meta> tags (OpenGraph, microdata, etc.) — e.g. selector="meta[property='og:title']", attribute="content".
+- Use attribute=datetime for <time> elements with machine-readable timestamps.
 - container_selector is required when strategy is repeated_dom_selector.
 - Prefer the highest-confidence candidate_section from the compact representation as container.
 - Plan.fields is a LIST of {name, selector, attribute, type, fallback_selector?}. The name MUST match a field name from the user's schema; do not invent new fields.

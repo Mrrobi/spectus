@@ -187,7 +187,7 @@ Set via env var (or pass to `Client.create(settings={...})`).
 - SSRF: blocks private / loopback / link-local / reserved IPs before any fetch.
 - Robots.txt: 1h-TTL cache, fail-open on 5xx.
 - Per-domain rate-limit token bucket.
-- Allowed selector attributes: `text`, `href`, `src`, `alt`, `title`, `class`, `id`, `value`, `data-*`, `aria-*`. Anything else rejected at the Pydantic boundary.
+- Allowed selector attributes: `text`, `href`, `src`, `srcset`, `alt`, `title`, `class`, `id`, `value`, `content`, `datetime`, `name`, `type`, `role`, `placeholder`, `download`, `rel`, `property`, `lang`, `data-*`, `aria-*`. Anything else rejected at the Pydantic boundary.
 - jQuery extensions (`:has()`, `:is()`, `:visible`, etc.) rejected. `:contains('text')` translated server-side.
 - No CAPTCHA solve, no auth bypass, no anti-bot evasion. Out of scope by design.
 

@@ -36,7 +36,7 @@ Reusable client (sync wrapper):
 
 from __future__ import annotations
 
-__version__ = "0.2.4"
+__version__ = "0.2.5"
 
 from spectus.client import Client, SyncClient, extract
 
