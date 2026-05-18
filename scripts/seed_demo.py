@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import asyncio
 
-from app.config import get_settings
-from app.db.session import make_engine, make_sessionmaker
-from app.logging import configure_logging, get_logger
+from spectus.config import get_settings
+from spectus._db.session import make_engine, make_sessionmaker
+from spectus.logging import configure_logging, get_logger
 
 
 async def main() -> None:

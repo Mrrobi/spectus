@@ -1,10 +1,13 @@
 [project]
 name = "spectus"
-version = "0.1.0"
+version = "0.2.0"
 description = "AI-assisted web data extractor — paste a URL + plain-English instruction, get structured JSON or CSV. Resilient to DOM changes via semantic LLM extraction."
 requires-python = ">=3.12"
 readme = "README.md"
 license = {text = "MIT"}
+authors = [
+    {name = "Mrrobi", email = "mrrobi@users.noreply.github.com"},
+]
 keywords = ["scraping", "ai", "llm", "data-extraction", "playwright", "openai"]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -15,11 +18,8 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Topic :: Internet :: WWW/HTTP",
     "Topic :: Software Development :: Libraries",
-    "Framework :: FastAPI",
 ]
 dependencies = [
-    "fastapi>=0.115",
-    "uvicorn[standard]>=0.30",
     "pydantic>=2.7",
     "pydantic-settings>=2.4",
     "sqlalchemy[asyncio]>=2.0",
@@ -49,7 +49,6 @@ dev = [
     "pytest-cov>=5.0",
     "pytest-xdist>=3.6",
     "respx>=0.21",
-    "asgi-lifespan>=2.1",
     "dirty-equals>=0.8",
     "ruff>=0.6",
     "mypy>=1.11",
@@ -61,7 +60,7 @@ notebook = [
 ]
 
 [project.scripts]
-spectus = "app.cli:main"
+spectus = "spectus.cli:main"
 
 [project.urls]
 Homepage = "https://github.com/Mrrobi/spectus"
@@ -73,11 +72,10 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
-include = ["app*", "notebooks*", "alembic*", "spectus*"]
+include = ["spectus*", "alembic*"]
 
 [tool.setuptools.package-data]
 "alembic" = ["*.mako", "**/*.py"]
-"app" = ["prompts/*.md"]
 
 [tool.ruff]
 line-length = 100

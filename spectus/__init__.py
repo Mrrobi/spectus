@@ -1,4 +1,4 @@
-"""spectus — public client.
+"""spectus — AI-assisted web data extractor.
 
 Quick one-shot usage (sync, simplest):
 
@@ -35,7 +35,7 @@ Reusable client (sync wrapper):
 """
 from __future__ import annotations
 
-from app import __version__
+__version__ = "0.2.0"
 
 from spectus.client import Client, SyncClient, extract
 

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from app.services.exporter import records_to_csv
+from spectus._core.exporter import records_to_csv
 
 
 def test_empty_records():

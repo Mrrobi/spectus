@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import pytest
 
-from app.errors import InvalidUrlError
-from app.services.url_normalizer import normalize
+from spectus.errors import InvalidUrlError
+from spectus._core.url_normalizer import normalize
 
 
 def test_basic_https():

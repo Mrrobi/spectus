@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from app.schemas.intent import FieldSpec, IntentSchema
-from app.services.template_manager import goal_signature, url_pattern_glob
+from spectus._schemas.intent import FieldSpec, IntentSchema
+from spectus._core.template_manager import goal_signature, url_pattern_glob
 
 
 def _schema(names):

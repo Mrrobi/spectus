@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from app.services.structured_data import extract
+from spectus._core.structured_data import extract
 
 
 JSON_LD_PRODUCT = """

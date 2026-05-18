@@ -7,8 +7,8 @@ import threading
 from pathlib import Path
 from typing import Any
 
-from app.schemas.api import ExtractionResponse
-from notebooks.spectus import Extractor
+from spectus._schemas.api import ExtractionResponse
+from spectus._core.extractor import Extractor
 
 
 def _ensure_db() -> None:

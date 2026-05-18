@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from app.services.repeated_detector import detect_repeated_sections
+from spectus._core.repeated_detector import detect_repeated_sections
 
 PRODUCT_LISTING = """
 <html><body>

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from app.services.normalizer import FieldNormalizer
+from spectus._core.normalizer import FieldNormalizer
 
 
 def test_url_normalizer_resolves_relative():

@@ -4,8 +4,8 @@ import time
 
 import pytest
 
-from app.errors import BudgetExceededError
-from app.services.budget import BudgetTracker
+from spectus.errors import BudgetExceededError
+from spectus._core.budget import BudgetTracker
 
 
 def test_remaining_decreases():

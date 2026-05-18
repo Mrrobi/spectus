@@ -5,10 +5,10 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from app.config import Settings
-from app.errors import BlockedUrlError
-from app.services.compliance import ComplianceChecker, _TokenBucket
-from app.services.url_normalizer import normalize
+from spectus.config import Settings
+from spectus.errors import BlockedUrlError
+from spectus._core.compliance import ComplianceChecker, _TokenBucket
+from spectus._core.url_normalizer import normalize
 
 
 @pytest.mark.asyncio

@@ -2,10 +2,10 @@ from __future__ import annotations
 
 import pytest
 
-from app.schemas.execution import ExtractionResult
-from app.schemas.intent import FieldSpec, IntentSchema
-from app.schemas.page import CompactPage
-from app.services.validator import Validator
+from spectus._schemas.execution import ExtractionResult
+from spectus._schemas.intent import FieldSpec, IntentSchema
+from spectus._schemas.page import CompactPage
+from spectus._core.validator import Validator
 
 
 def _intent(fields, expected_output="array"):
@@ -19,7 +19,7 @@ def _intent(fields, expected_output="array"):
 
 def _compact(containers: int = 0):
     if containers:
-        from app.schemas.page import CandidateSection
+        from spectus._schemas.page import CandidateSection
         return CompactPage(
             url="http://x",
             candidate_sections=[

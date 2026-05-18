@@ -20,7 +20,7 @@ def fixtures_dir() -> Path:
 
 @pytest.fixture
 def settings():
-    from app.config import Settings, reset_settings_for_test
+    from spectus.config import Settings, reset_settings_for_test
 
     s = Settings(allow_private_targets=True, openai_api_key="", browser_pool_size=0)
     reset_settings_for_test(s)
